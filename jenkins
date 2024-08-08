@@ -9,7 +9,7 @@ pipeline {
             steps {
                 script {
                     // Change directory to where your Terraform files are located
-                    dir('terraform/main.tf) {
+                    dir('terraform/main.tf') {
                         // Initialize Terraform (if not already initialized)
                         sh 'terraform init'
                         
