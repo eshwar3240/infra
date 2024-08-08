@@ -8,8 +8,8 @@ data "aws_vpc" "default" {
   default = true
 }
 
-# Data source for default subnets
-data "aws_subnet_ids" "default" {
+# Data source for default public subnets
+data "aws_subnets" "public" {
   vpc_id = data.aws_vpc.default.id
 }
 
@@ -31,26 +31,42 @@ resource "aws_s3_bucket_versioning" "kops_state" {
   }
 }
 
+# S3 bucket for Load Balancer logs
+resource "aws_s3_bucket" "lb_logs" {
+  bucket = "my-lb-logs-bucket" # Ensure this is globally unique
+}
+
+# Enable versioning for the S3 bucket used for load balancer logs
+resource "aws_s3_bucket_versioning" "lb_logs" {
+  bucket = aws_s3_bucket.lb_logs.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 # Application Load Balancer
-resource "aws_lb" "example" {
-  name               = "example-lb"
+resource "aws_lb" "test" {
+  name               = "test-lb-tf"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [data.aws_security_group.default.id]
-  subnets            = data.aws_subnet_ids.default.ids
+  subnets            = data.aws_subnets.public.ids
 
-  enable_deletion_protection = false
-  idle_timeout               = 60
-  drop_invalid_header_fields = true
-  enable_http2               = true
+  enable_deletion_protection = true
+
+  access_logs {
+    bucket  = aws_s3_bucket.lb_logs.id
+    prefix  = "test-lb"
+    enabled = true
+  }
 
   tags = {
-    Name = "example-lb"
+    Environment = "production"
   }
 }
 
 resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.example.arn
+  load_balancer_arn = aws_lb.test.arn
   port              = 80
   protocol          = "HTTP"
 
@@ -68,6 +84,10 @@ output "s3_bucket" {
   value = aws_s3_bucket.kops_state.bucket
 }
 
+output "lb_logs_bucket" {
+  value = aws_s3_bucket.lb_logs.bucket
+}
+
 output "elb_dns_name" {
-  value = aws_lb.example.dns_name
+  value = aws_lb.test.dns_name
 }
