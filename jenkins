@@ -7,10 +7,16 @@ pipeline {
     stages {
         stage('Deploy Infrastructure') {
             steps {
-                sh '''
-                terraform init
-                terraform apply -auto-approve
-                '''
+                script {
+                    // Change directory to where your Terraform files are located
+                    dir('terraform/main.tf) {
+                        // Initialize Terraform (if not already initialized)
+                        sh 'terraform init'
+                        
+                        // Apply Terraform changes
+                        sh 'terraform apply -auto-approve'
+                    }
+                }
             }
         }
     }
