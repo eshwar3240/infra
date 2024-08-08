@@ -9,14 +9,13 @@ data "aws_vpc" "default" {
 }
 
 # Data source for default subnets
-data "aws_subnets" "default" {
+data "aws_subnet_ids" "default" {
   vpc_id = data.aws_vpc.default.id
 }
 
 # Data source for default security group
 data "aws_security_group" "default" {
   vpc_id = data.aws_vpc.default.id
-  # Specify the default security group ID
 }
 
 # S3 bucket for Kops state management
@@ -38,7 +37,7 @@ resource "aws_lb" "example" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [data.aws_security_group.default.id]
-  subnets            = data.aws_subnets.default.ids
+  subnets            = data.aws_subnet_ids.default.ids
 
   enable_deletion_protection = false
   idle_timeout               = 60
