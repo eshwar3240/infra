@@ -4,63 +4,65 @@ provider "aws" {
 }
 
 # Data source for default VPC
-data "aws_vpc" "default" {
+data "aws_vpc" "eshwar_default" {
   default = true
 }
 
-
-
-data "aws_subnets" "public" {
+# Data source for public subnets
+data "aws_subnets" "eshwar_public" {
   filter {
     name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
+    values = [data.aws_vpc.eshwar_default.id]
   }
 }
 
 # Data source for default security group
-data "aws_security_group" "default" {
-  vpc_id = data.aws_vpc.default.id
+data "aws_security_group" "eshwar_default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.eshwar_default.id]
+  }
 }
 
 # S3 bucket for Kops state management
-resource "aws_s3_bucket" "kops_state" {
-  bucket = "my-kops-state-bucket" # Ensure this is globally unique
+resource "aws_s3_bucket" "eshwar_kops_state" {
+  bucket = "eshwar-kops-state-bucket" # Ensure this is globally unique
 }
 
 # Enable versioning for the S3 bucket
-resource "aws_s3_bucket_versioning" "kops_state" {
-  bucket = aws_s3_bucket.kops_state.id
+resource "aws_s3_bucket_versioning" "eshwar_kops_state_versioning" {
+  bucket = aws_s3_bucket.eshwar_kops_state.id
   versioning_configuration {
     status = "Disabled"
   }
 }
 
 # S3 bucket for Load Balancer logs
-resource "aws_s3_bucket" "lb_logs" {
-  bucket = "my-lb-logs-bucket" # Ensure this is globally unique
+resource "aws_s3_bucket" "eshwar_lb_logs" {
+  bucket = "eshwar-lb-logs-bucket" # Ensure this is globally unique
 }
 
 # Enable versioning for the S3 bucket used for load balancer logs
-resource "aws_s3_bucket_versioning" "lb_logs" {
-  bucket = aws_s3_bucket.lb_logs.id
+resource "aws_s3_bucket_versioning" "eshwar_lb_logs_versioning" {
+  bucket = aws_s3_bucket.eshwar_lb_logs.id
   versioning_configuration {
     status = "Enabled"
   }
 }
 
 # Application Load Balancer
-resource "aws_lb" "test" {
-  name               = "test-lb-tf"
+resource "aws_lb" "eshwar_test_lb" {
+  name               = "eshwar-test-lb-tf"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [data.aws_security_group.default.id]
-  subnets            = data.aws_subnets.public.ids
+  security_groups    = [data.aws_security_group.eshwar_default.id]
+  subnets            = data.aws_subnets.eshwar_public.ids
 
   enable_deletion_protection = false
 
   access_logs {
-    bucket  = aws_s3_bucket.lb_logs.id
-    prefix  = "test-lb"
+    bucket  = aws_s3_bucket.eshwar_lb_logs.id
+    prefix  = "eshwar-test-lb"
     enabled = true
   }
 
@@ -69,8 +71,8 @@ resource "aws_lb" "test" {
   }
 }
 
-resource "aws_lb_listener" "http" {
-  load_balancer_arn = aws_lb.test.arn
+resource "aws_lb_listener" "eshwar_http_listener" {
+  load_balancer_arn = aws_lb.eshwar_test_lb.arn
   port              = 80
   protocol          = "HTTP"
 
@@ -85,13 +87,13 @@ resource "aws_lb_listener" "http" {
 }
 
 output "s3_bucket" {
-  value = aws_s3_bucket.kops_state.bucket
+  value = aws_s3_bucket.eshwar_kops_state.bucket
 }
 
 output "lb_logs_bucket" {
-  value = aws_s3_bucket.lb_logs.bucket
+  value = aws_s3_bucket.eshwar_lb_logs.bucket
 }
 
 output "elb_dns_name" {
-  value = aws_lb.test.dns_name
+  value = aws_lb.eshwar_test_lb.dns_name
 }
