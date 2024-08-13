@@ -1,6 +1,5 @@
 provider "aws" {
-  region = "ap-south-1"
-  # Credentials will be provided through environment variables or Jenkins credentials
+  region = "ap-south-1"  # Specify your desired AWS region
 }
 
 # Data source for default VPC
@@ -26,7 +25,7 @@ data "aws_security_group" "eshwar1000_default" {
 
 # S3 bucket for Kops state management
 resource "aws_s3_bucket" "eshwar1000_kops_state" {
-  bucket = "eshwar1000-kops-state-bucket" # Ensure this is globally unique
+  bucket = "eshwar1000-kops-state-bucket"  # Ensure this is globally unique
 }
 
 # Enable versioning for the S3 bucket
@@ -39,7 +38,7 @@ resource "aws_s3_bucket_versioning" "eshwar1000_kops_state_versioning" {
 
 # S3 bucket for Load Balancer logs
 resource "aws_s3_bucket" "eshwar1000_lb_logs" {
-  bucket = "eshwar1000-lb-logs-bucket" # Ensure this is globally unique
+  bucket = "eshwar1000-lb-logs-bucket"  # Ensure this is globally unique
 }
 
 # Enable versioning for the S3 bucket used for load balancer logs
@@ -71,6 +70,7 @@ resource "aws_lb" "eshwar1000_test_lb" {
   }
 }
 
+# Load Balancer Listener
 resource "aws_lb_listener" "eshwar1000_http_listener" {
   load_balancer_arn = aws_lb.eshwar1000_test_lb.arn
   port              = 80
@@ -86,6 +86,7 @@ resource "aws_lb_listener" "eshwar1000_http_listener" {
   }
 }
 
+# Outputs
 output "s3_bucket" {
   value = aws_s3_bucket.eshwar1000_kops_state.bucket
 }
@@ -97,8 +98,4 @@ output "lb_logs_bucket" {
 output "elb_dns_name" {
   value = aws_lb.eshwar1000_test_lb.dns_name
 }
-
-# If you have another output for the same value, rename it
-output "another_elb_dns_name" {  # Example of renaming
-  value = aws_lb.eshwar1000_test_lb.dns_name
 }
