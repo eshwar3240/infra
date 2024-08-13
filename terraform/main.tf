@@ -97,6 +97,8 @@ output "lb_logs_bucket" {
 output "elb_dns_name" {
   value = aws_lb.eshwar1000_test_lb.dns_name
 }
-output "elb_dns_name" {
-  value = aws_lb.eshwar_test_lb.dns_name
+
+# If you have another output for the same value, rename it
+output "another_elb_dns_name" {  # Example of renaming
+  value = aws_lb.eshwar1000_test_lb.dns_name
 }
