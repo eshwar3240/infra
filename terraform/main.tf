@@ -27,7 +27,7 @@ resource "aws_s3_bucket" "kops_state" {
 resource "aws_s3_bucket_versioning" "kops_state" {
   bucket = aws_s3_bucket.kops_state.id
   versioning_configuration {
-    status = "Enabled"
+    status = "disabled"
   }
 }
 
@@ -52,7 +52,7 @@ resource "aws_lb" "test" {
   security_groups    = [data.aws_security_group.default.id]
   subnets            = data.aws_subnets.public.ids
 
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 
   access_logs {
     bucket  = aws_s3_bucket.lb_logs.id
