@@ -10,7 +10,9 @@ data "aws_vpc" "default" {
 
 # Data source for default public subnets
 data "aws_subnets" "public" {
+filter{
   vpc_id = data.aws_vpc.default.id
+}
 }
 
 # Data source for default security group
@@ -27,7 +29,7 @@ resource "aws_s3_bucket" "kops_state" {
 resource "aws_s3_bucket_versioning" "kops_state" {
   bucket = aws_s3_bucket.kops_state.id
   versioning_configuration {
-    status = "disabled"
+    status = "Disabled"
   }
 }
 
