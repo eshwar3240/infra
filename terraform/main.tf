@@ -8,11 +8,13 @@ data "aws_vpc" "default" {
   default = true
 }
 
-# Data source for default public subnets
+
+
 data "aws_subnets" "public" {
-filter{
-  vpc_id = data.aws_vpc.default.id
-}
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
 }
 
 # Data source for default security group
