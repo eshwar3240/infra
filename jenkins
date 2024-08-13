@@ -1,0 +1,32 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('aws-accesskey-credentials-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secretkey-credentials-id')
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                // Checkout the code from your Git repository
+                git url: 'https://github.com/eshwar3240/infra.git', branch: 'master'  // Change to your Git repository URL and branch
+            }
+        }
+
+        stage('Deploy Infrastructure') {
+            steps {
+                script {
+                    // Change directory to where your Terraform files are located
+                    dir('terraform') {
+                        // Initialize Terraform (if not already initialized)
+                        sh 'terraform init'
+                        
+                        // Apply Terraform changes
+                        sh 'terraform apply -auto-approve'
+                    }
+                }
+            }
+        }
+    }
+}
